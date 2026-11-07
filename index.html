@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PresuFácil · Caso Dulces del Norte · PIA Contabilidad Administrativa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilos.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P<span>F</span></div>
+      <div class="brand-text">
+        <h1>PresuFácil</h1>
+        <p>Caso: Dulces del Norte, S.A. de C.V.</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-reset" class="btn btn-ghost">Restablecer</button>
+      <button id="btn-export" class="btn btn-primary">Descargar CSV</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav>
+        <button class="nav-item active" data-section="dashboard">Resumen general</button>
+        <p class="nav-group-label">Datos de entrada</p>
+        <button class="nav-item" data-section="supuestos">Supuestos</button>
+        <p class="nav-group-label">Presupuestos operativos</p>
+        <button class="nav-item" data-section="ventas">1. Ventas</button>
+        <button class="nav-item" data-section="produccion">2. Producción</button>
+        <button class="nav-item" data-section="compras">3. Compras de MP</button>
+        <button class="nav-item" data-section="mod">4. Mano de obra</button>
+        <button class="nav-item" data-section="gif">5. GIF</button>
+        <p class="nav-group-label">Estados financieros</p>
+        <button class="nav-item" data-section="gastos">6. Gastos de operación</button>
+        <button class="nav-item" data-section="resultados">7. Estado de resultados</button>
+        <button class="nav-item" data-section="flujo">8. Flujo de efectivo</button>
+      </nav>
+      <div class="sidebar-footer">
+        <p>Contabilidad Administrativa</p>
+        <p class="small">FACPYA · UANL · Ago–Dic 2026</p>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section active">
+        <div class="section-head">
+          <p class="eyebrow">Resumen general</p>
+          <h2>Dashboard del Presupuesto Maestro</h2>
+          <p class="lead">Indicadores anuales calculados a partir de los supuestos cargados para el caso de Dulces del Norte. Al modificar cualquier supuesto, todo el presupuesto se recalcula solo.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <span class="kpi-label">Ventas anuales</span>
+            <strong class="kpi-value" id="kpi-ventas">$0</strong>
+            <span class="kpi-foot" id="kpi-ventas-units">—</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Costo de ventas</span>
+            <strong class="kpi-value" id="kpi-cogs">$0</strong>
+            <span class="kpi-foot">Costeo absorbente</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Utilidad bruta</span>
+            <strong class="kpi-value" id="kpi-bruta">$0</strong>
+            <span class="kpi-foot" id="kpi-margen">—</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Utilidad neta</span>
+            <strong class="kpi-value" id="kpi-neta">$0</strong>
+            <span class="kpi-foot" id="kpi-margen-neto">—</span>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <div class="card-head">
+              <h3>Ventas vs costo de ventas</h3>
+              <span class="chip">Trimestral</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-ventas"></canvas></div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-head">
+              <h3>Producción requerida</h3>
+              <span class="chip">Cajas</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-produccion"></canvas></div>
+          </div>
+
+          <div class="card chart-card wide">
+            <div class="card-head">
+              <h3>Utilidades por trimestre</h3>
+              <span class="chip">$</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-utilidad"></canvas></div>
+          </div>
+
+          <div class="card chart-card wide">
+            <div class="card-head">
+              <h3>Composición del costo de producción</h3>
+              <span class="chip">MP · MOD · GIF</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-composicion"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUPUESTOS -->
+      <section id="supuestos" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Datos de entrada</p>
+          <h2>Supuestos del Presupuesto Maestro</h2>
+          <p class="lead">Todos los campos son editables. Los valores cargados por defecto corresponden al caso de Dulces del Norte. Si cambias uno, los ocho presupuestos se actualizan en automático.</p>
+        </div>
+
+        <form id="form-supuestos" class="form-grid">
+          <fieldset class="card field-card">
+            <legend>Ventas</legend>
+            <label>Cajas vendidas Q1 <input type="number" name="ventas[0]" value="800" min="0" step="1"></label>
+            <label>Cajas vendidas Q2 <input type="number" name="ventas[1]" value="950" min="0" step="1"></label>
+            <label>Cajas vendidas Q3 <input type="number" name="ventas[2]" value="1100" min="0" step="1"></label>
+            <label>Cajas vendidas Q4 <input type="number" name="ventas[3]" value="1600" min="0" step="1"></label>
+            <label>Precio por caja <input type="number" name="precio" value="180" min="0" step="0.01"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Inventarios de producto terminado</legend>
+            <label>% IF PT sobre ventas sig. trim. <input type="number" name="ifPtPct" value="0.10" min="0" max="1" step="0.01"></label>
+            <label>II PT Q1 (cajas) <input type="number" name="iiPtQ1" value="80" min="0" step="1"></label>
+            <label>Costo unitario II PT Q1 <input type="number" name="iiPtCostoUnit" value="115" min="0" step="0.01"></label>
+            <label>Ventas Q1 del año siguiente <input type="number" name="ventasSigQ1" value="1800" min="0" step="1"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Materia prima</legend>
+            <label>MP por caja (kg) <input type="number" name="mpPorUnidad" value="1" min="0" step="0.01"></label>
+            <label>Costo por kg <input type="number" name="costoMp" value="40" min="0" step="0.01"></label>
+            <label>% IF MP sobre consumo sig. <input type="number" name="ifMpPct" value="0.20" min="0" max="1" step="0.01"></label>
+            <label>II MP Q1 (kg) <input type="number" name="iiMpQ1" value="200" min="0" step="1"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Mano de obra directa</legend>
+            <label>Horas MOD por caja <input type="number" name="horasMod" value="0.6" min="0" step="0.01"></label>
+            <label>Tarifa por hora <input type="number" name="tarifaMod" value="85" min="0" step="0.01"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Gastos indirectos de fabricación</legend>
+            <label>GIF variable por caja <input type="number" name="gifVar" value="10" min="0" step="0.01"></label>
+            <label>GIF fijos por trimestre <input type="number" name="gifFijo" value="12000" min="0" step="0.01"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Gastos de operación</legend>
+            <label>Gastos de venta fijos / trim <input type="number" name="gvFijo" value="6000" min="0" step="0.01"></label>
+            <label>Gastos de venta variables (% ventas) <input type="number" name="gvVarPct" value="0.03" min="0" max="1" step="0.01"></label>
+            <label>Gastos de administración / trim <input type="number" name="gaFijo" value="4500" min="0" step="0.01"></label>
+          </fieldset>
+
+          <fieldset class="card field-card">
+            <legend>Impuestos y cobranza</legend>
+            <label>ISR + PTU (%) <input type="number" name="isrPct" value="0.30" min="0" max="1" step="0.01"></label>
+            <label>Cobranza dentro del trimestre <input type="number" name="cobroQ" value="0.75" min="0" max="1" step="0.01"></label>
+            <label>Pago de compras dentro del trimestre <input type="number" name="pagoQ" value="0.65" min="0" max="1" step="0.01"></label>
+          </fieldset>
+        </form>
+      </section>
+
+      <!-- VENTAS -->
+      <section id="ventas" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 1</p>
+          <h2>Presupuesto de ventas</h2>
+          <p class="lead">Es el punto de partida de todo el Presupuesto Maestro. Aquí solo multiplicamos cajas por precio.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-ventas"></div></div>
+      </section>
+
+      <!-- PRODUCCION -->
+      <section id="produccion" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 2</p>
+          <h2>Presupuesto de producción</h2>
+          <p class="lead">Producción = ventas + inventario final de PT − inventario inicial de PT. Es el presupuesto que más nos costó entender al inicio del proyecto.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-produccion"></div></div>
+      </section>
+
+      <!-- COMPRAS -->
+      <section id="compras" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 3</p>
+          <h2>Compras de materia prima</h2>
+          <p class="lead">Compras = consumo de MP + IF MP − II MP. El consumo depende de la producción, no de las ventas.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-compras"></div></div>
+      </section>
+
+      <!-- MOD -->
+      <section id="mod" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 4</p>
+          <h2>Mano de obra directa</h2>
+          <p class="lead">Horas MOD = producción × horas por unidad. Costo = horas × tarifa.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-mod"></div></div>
+      </section>
+
+      <!-- GIF -->
+      <section id="gif" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 5</p>
+          <h2>Gastos indirectos de fabricación</h2>
+          <p class="lead">GIF totales = (producción × GIF variable unitario) + GIF fijos del trimestre.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-gif"></div></div>
+      </section>
+
+      <!-- GASTOS -->
+      <section id="gastos" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Presupuesto 6</p>
+          <h2>Gastos de operación</h2>
+          <p class="lead">Gastos de venta (fijos + variables) más gastos de administración. No entran al costo del producto, van directo al estado de resultados.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-gastos"></div></div>
+      </section>
+
+      <!-- RESULTADOS -->
+      <section id="resultados" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Estado financiero 7</p>
+          <h2>Estado de resultados proforma</h2>
+          <p class="lead">Usamos costeo absorbente: el costo de ventas incorpora materia prima, mano de obra y GIF del período.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-resultados"></div></div>
+      </section>
+
+      <!-- FLUJO -->
+      <section id="flujo" class="section">
+        <div class="section-head">
+          <p class="eyebrow">Estado financiero 8</p>
+          <h2>Flujo de efectivo presupuestado</h2>
+          <p class="lead">Aquí modelamos que no todo se cobra ni se paga al contado. Parte de las ventas y compras quedan pendientes para el trimestre siguiente.</p>
+        </div>
+        <div class="card table-card"><div id="tabla-flujo"></div></div>
+      </section>
+
+      <footer class="page-footer">
+        <span>PIA · Contabilidad Administrativa · LTI · FACPYA-UANL · Ago–Dic 2026</span>
+        <span class="small">HTML5 · CSS3 · JavaScript · Chart.js</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="calculos.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
